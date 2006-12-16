@@ -1,0 +1,69 @@
+#
+Summary:	Program to distribute compilation of C or C++
+Summary(pl):	Program do rozdzielania kompilacji programów w C lub C++
+Name:		icecream
+Version:	0.7.14
+Release:	0.1
+License:	GPL v2
+Group:		Development/Languages
+Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
+# Source0-md5:	8d167d48bc7854b6277a105cafbf2b49
+URL:		http://en.opensuse.org/Icecream
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%description
+Icecream is the next generation distcc.
+
+%description -l pl
+Icecream jest kompilatorem distcc nowej generacji.
+
+%package devel
+Summary:	Header files for icecream
+Summary(pl):	Pliki nag³ówkowe icecream
+Group:		Development/Libraries
+Requires:	%{name} = %{version}-%{release}
+
+%description devel
+Header files for icecream.
+
+%description devel -l pl
+Pliki nag³ówkowe dla icecream.
+
+%prep
+%setup -q -n icecream
+
+%build
+%{__libtoolize}
+%{__aclocal}
+%{__autoconf}
+%{__autoheader}
+%{__automake}
+%configure
+
+%{__make} \
+	CFLAGS="%{rpmcflags}" \
+	LDFLAGS="%{rpmldflags}"
+
+%install
+rm -rf $RPM_BUILD_ROOT
+
+%{__make} install \
+	DESTDIR=$RPM_BUILD_ROOT
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(644,root,root,755)
+%doc ChangeLog NEWS README TODO
+%attr(755,root,root) %{_bindir}/icecc
+%{_libdir}/icecc
+%attr(755,root,root) %{_sbindir}/*
+
+%files devel
+%defattr(644,root,root,755)
+%{_includedir}/icecc
+%{_pkgconfigdir}/*.pc
