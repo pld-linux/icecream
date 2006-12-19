@@ -1,4 +1,3 @@
-#
 Summary:	Program to distribute compilation of C or C++
 Summary(pl):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
@@ -60,8 +59,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc ChangeLog NEWS README TODO
 %attr(755,root,root) %{_bindir}/icecc
-%{_libdir}/icecc
 %attr(755,root,root) %{_sbindir}/*
+%{_libdir}/icecc
 
 %files devel
 %defattr(644,root,root,755)
