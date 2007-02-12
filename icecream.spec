@@ -1,5 +1,5 @@
 Summary:	Program to distribute compilation of C or C++
-Summary(pl):	Program do rozdzielania kompilacji programÛw w C lub C++
+Summary(pl.UTF-8):   Program do rozdzielania kompilacji program√≥w w C lub C++
 Name:		icecream
 Version:	0.7.14
 Release:	0.1
@@ -16,20 +16,20 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 Icecream is the next generation distcc.
 
-%description -l pl
+%description -l pl.UTF-8
 Icecream jest kompilatorem distcc nowej generacji.
 
 %package devel
 Summary:	Header files for icecream
-Summary(pl):	Pliki nag≥Ûwkowe icecream
+Summary(pl.UTF-8):   Pliki nag≈Ç√≥wkowe icecream
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 
 %description devel
 Header files for icecream.
 
-%description devel -l pl
-Pliki nag≥Ûwkowe dla icecream.
+%description devel -l pl.UTF-8
+Pliki nag≈Ç√≥wkowe dla icecream.
 
 %prep
 %setup -q -n icecream
