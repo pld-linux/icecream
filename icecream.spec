@@ -2,7 +2,7 @@ Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
 Version:	0.7.14
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Development/Languages
 Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
@@ -71,4 +71,6 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(644,root,root,755)
 %{_includedir}/icecc
+%attr(755,root,root) %{_libdir}/lib*.so
+%{_libdir}/libicecc.la
 %{_pkgconfigdir}/*.pc
