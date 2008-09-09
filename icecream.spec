@@ -10,9 +10,10 @@ Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
 Source1:	%{name}.sysconfig
 Source2:	%{name}-iceccd.init
 URL:		http://en.opensuse.org/Icecream
-BuildRequires:	autoconf
-BuildRequires:	automake
+BuildRequires:	autoconf >= 2.53
+BuildRequires:	automake >= 1.6
 BuildRequires:	libtool
+BuildRequires:	librsync-devel
 Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
