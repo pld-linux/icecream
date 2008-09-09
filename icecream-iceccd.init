@@ -1,0 +1,118 @@
+#!/bin/sh
+#
+# iceccd:   Distributed compiler daemon
+#
+# chkconfig: - 98 02
+# description:  This is a daemon for speeding up builds by \
+#		distributing compile jobs to several computers on a network.
+#
+
+### BEGIN INIT INFO
+# Provides: iceccd
+# Required-Start: $local_fs $remote_fs $network $named
+# Required-Stop: $local_fs $remote_fs $network $named
+# Short-Description: Start/stop Icecream distributed compiler
+# Description: Start / stop the Icecream distributed compiler daemon
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source config
+if [ -f /etc/sysconfig/icecream ] ; then
+        . /etc/sysconfig/icecream
+fi
+
+exec=/usr/sbin/iceccd
+service=iceccd
+
+lockfile=/var/lock/subsys/iceccd
+
+start() {
+	[ -x $exec ] || exit 5
+	[ -f $config ] || exit 6
+	echo -n $"Starting distributed compiler daemon: "
+	params=""
+	if [ -n "$ICECREAM_NETNAME" ] ; then
+		params="$params -n $ICECREAM_NETNAME"
+	fi
+	if [ -n "$ICECREAM_LOG_FILE" ] ; then
+		params="$params -l $ICECREAM_LOG_FILE"
+	fi
+	if [ -n "$ICECREAM_NICE_LEVEL" ] ; then
+		params="$params --nice $ICECREAM_NICE_LEVEL"
+	fi
+	if [ -n "$ICECREAM_SCHEDULER_HOST" ] ; then
+		params="$params -s $ICECREAM_SCHEDULER_HOST"
+	fi
+	if [ "$ICECREAM_ALLOW_REMOTE" = "no" 2> /dev/null ] ; then
+		params="$params --no-remote"
+	fi
+	if [ -n "$ICECREAM_MAX_JOBS" ] ; then
+		if [ "$ICECREAM_MAX_JOBS" -eq 0 2> /dev/null ] ; then
+			params="$params -m 1"
+			params="$params --no-remote"
+		else
+			params="$params -m $ICECREAM_MAX_JOBS"
+		fi
+	fi
+	params="$params -b \"$ICECREAM_BASEDIR\""
+	daemon --check $service $exec -d -u icecream $params
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch $lockfile
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping distributed compiler daemon: "
+
+	killproc $service
+	RETVAL=$?
+	echo
+	if [ $RETVAL -eq 0 ]; then
+		rm -f $lockfile
+	fi
+	return $RETVAL
+}
+
+restart() {
+	stop
+	start
+}
+
+reload() {
+	restart
+}
+
+force_reload() {
+	restart
+}
+
+RETVAL=0
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart)
+        stop
+        start
+        ;;
+  try-restart)
+        condrestart 0
+        ;;
+  force-reload)
+        condrestart 7
+        ;;
+  status)
+        status icecream
+        ;;
+  *)
+        msg_usage "$0 {start|stop|restart|try-restart|force-reload|status}"
+        exit 3
+esac
+
+exit $RETVAL
