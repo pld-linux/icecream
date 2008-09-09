@@ -24,9 +24,6 @@ if [ -f /etc/sysconfig/icecream ] ; then
 fi
 
 exec=/usr/sbin/iceccd
-service=iceccd
-
-lockfile=/var/lock/subsys/iceccd
 
 start() {
 	[ -x $exec ] || exit 5
@@ -57,30 +54,28 @@ start() {
 		fi
 	fi
 	params="$params -b \"$ICECREAM_BASEDIR\""
-	daemon $service $exec -d -u icecream $params
+	daemon $exec -d -u icecream $params
 	RETVAL=$?
-	[ $RETVAL -eq 0 ] && touch $lockfile
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/iceccd
         else
-                msg_already_running icecream
+                msg_already_running iceccd
         fi
 
 	return $RETVAL
 }
 
 stop() {
-	msg_stopping iceccd
-
-	killproc $service
-	RETVAL=$?
-	echo
-	if [ $RETVAL -eq 0 ]; then
-		rm -f $lockfile
+	if [ -f /var/lock/subsys/iceccd ]; then
+		msg_stopping iceccd
+		killproc iceccd 
+		rm -f /var/lock/subsys/iceccd
+	else
+		msg_not_running iceccd
 	fi
-	return $RETVAL
 }
 
 condrestart() {
-        if [ -f /var/lock/subsys/icecream ]; then
+        if [ -f /var/lock/subsys/iceccd ]; then
                 stop
                 start
         else
