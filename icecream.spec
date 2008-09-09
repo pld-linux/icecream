@@ -13,6 +13,15 @@ URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libtool
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
+Requires(post,postun):	/sbin/ldconfig
+Requires(post,preun):	/sbin/chkconfig
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires:	rc-scripts
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -67,14 +76,12 @@ for i in cc gcc c++ g++; do
 	rm -f $RPM_BUILD_ROOT%{_bindir}/$i
 done
 
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %pre
 %groupadd -g 197 icecream
 %useradd -u 197 -s /bin/false -d /var/cache/icecream -c "Icecream User" -g icecream icecream
-
 
 %post 
 /sbin/ldconfig
@@ -96,23 +103,25 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc COPYING NEWS README TODO
+%doc NEWS README TODO
 %attr(754,root,root) /etc/rc.d/init.d/iceccd
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
-%{_libdir}/icecc/bin/cc
-%{_libdir}/icecc/bin/gcc
-%{_libdir}/icecc/bin/c++
-%{_libdir}/icecc/bin/g++
-%{_libdir}/icecc/icecc-create-env
-%attr(755,root,root) %{_sbindir}/*
-%attr(755,root,root) %{_libdir}/lib*.so.*.*
-%attr(755,root,root) %{_libdir}/libicecc.so.0
-%{_libdir}/icecc
+%attr(755,root,root) %{_sbindir}/iceccd
+%attr(755,root,root) %{_sbindir}/scheduler
+%attr(755,root,root) %{_libdir}/libicecc.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libicecc.so.0
+%dir %{_libdir}/icecc
+%dir %{_libdir}/icecc/bin
+%attr(755,root,root) %{_libdir}/icecc/bin/cc
+%attr(755,root,root) %{_libdir}/icecc/bin/gcc
+%attr(755,root,root) %{_libdir}/icecc/bin/c++
+%attr(755,root,root) %{_libdir}/icecc/bin/g++
+%attr(755,root,root) %{_libdir}/icecc/icecc-create-env
 
 %files devel
 %defattr(644,root,root,755)
-%{_includedir}/icecc
-%attr(755,root,root) %{_libdir}/lib*.so
+%attr(755,root,root) %{_libdir}/libicecc.so
 %{_libdir}/libicecc.la
-%{_pkgconfigdir}/*.pc
+%{_includedir}/icecc
+%{_pkgconfigdir}/icecc.pc
