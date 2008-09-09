@@ -51,8 +51,13 @@ Pliki nagłówkowe dla icecream.
 %install
 rm -rf $RPM_BUILD_ROOT
 
+install -d $RPM_BUILD_ROOT/etc/{sysconfig,rc.d/init.d}
+
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+install suse/sysconfig.icecream $RPM_BUILD_ROOT/etc/sysconfig/icecream
+install suse/init.icecream $RPM_BUILD_ROOT/etc/rc.d/init.d/icecream
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -63,6 +68,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc COPYING NEWS README TODO
+%attr(754,root,root) /etc/rc.d/init.d/%{name}
+%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
 %attr(755,root,root) %{_sbindir}/*
 %attr(755,root,root) %{_libdir}/lib*.so.*.*
