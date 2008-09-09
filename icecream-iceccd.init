@@ -30,8 +30,8 @@ lockfile=/var/lock/subsys/iceccd
 
 start() {
 	[ -x $exec ] || exit 5
-	[ -f $config ] || exit 6
-	echo -n $"Starting distributed compiler daemon: "
+	if [ ! -f /var/lock/subsys/iceccd ]; then
+	msg_starting iceccd
 	params=""
 	if [ -n "$ICECREAM_NETNAME" ] ; then
 		params="$params -n $ICECREAM_NETNAME"
@@ -57,15 +57,18 @@ start() {
 		fi
 	fi
 	params="$params -b \"$ICECREAM_BASEDIR\""
-	daemon --check $service $exec -d -u icecream $params
+	daemon $service $exec -d -u icecream $params
 	RETVAL=$?
-	echo
 	[ $RETVAL -eq 0 ] && touch $lockfile
+        else
+                msg_already_running icecream
+        fi
+
 	return $RETVAL
 }
 
 stop() {
-	echo -n $"Stopping distributed compiler daemon: "
+	msg_stopping iceccd
 
 	killproc $service
 	RETVAL=$?
@@ -76,17 +79,14 @@ stop() {
 	return $RETVAL
 }
 
-restart() {
-	stop
-	start
-}
-
-reload() {
-	restart
-}
-
-force_reload() {
-	restart
+condrestart() {
+        if [ -f /var/lock/subsys/icecream ]; then
+                stop
+                start
+        else
+                msg_not_running icecream
+                RETVAL=$1
+        fi
 }
 
 RETVAL=0
@@ -98,8 +98,7 @@ case "$1" in
         stop
         ;;
   restart)
-        stop
-        start
+      	condrestart 
         ;;
   try-restart)
         condrestart 0
