@@ -7,6 +7,7 @@ License:	GPL v2
 Group:		Development/Languages
 Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
 # Source0-md5:	d8f65259ef2f72d36c157b64a2ff11d5
+Source1:	%{name}-iceccd.init
 URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -58,7 +59,7 @@ install -d $RPM_BUILD_ROOT%{_libdir}/icecc/bin
 	DESTDIR=$RPM_BUILD_ROOT
 
 install suse/sysconfig.icecream $RPM_BUILD_ROOT/etc/sysconfig/icecream
-install suse/init.icecream $RPM_BUILD_ROOT/etc/rc.d/init.d/icecream
+install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iceccd
 
 for i in cc gcc c++ g++; do
 	ln -sf %{_bindir}/icecc $RPM_BUILD_ROOT%{_libdir}/icecc/bin/$i
@@ -69,22 +70,33 @@ done
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post -p /sbin/ldconfig
-/sbin/chkconfig --add %{name}
-%service %{name} restart
+%pre
+%groupadd -g 197 icecream
+%useradd -u 197 -s /bin/false -d /var/cache/icecream -c "Icecream User" -g icecream icecream
+
+
+%post 
+/sbin/ldconfig
+/sbin/chkconfig --add iceccd
+%service iceccd restart
 
 %preun
 if [ "$1" = "0" ]; then
-	%service %{name} stop
-	/sbin/chkconfig --del %{name}
+	%service iceccd stop
+	/sbin/chkconfig --del iceccd
 fi
 
-%postun -p /sbin/ldconfig
+%postun
+if [ "$1" = "0" ]; then
+	%userremove icecream
+	%groupremove icecream
+fi
+/sbin/ldconfig
 
 %files
 %defattr(644,root,root,755)
 %doc COPYING NEWS README TODO
-%attr(754,root,root) /etc/rc.d/init.d/%{name}
+%attr(754,root,root) /etc/rc.d/init.d/iceccd
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
 %{_libdir}/icecc/bin/cc
