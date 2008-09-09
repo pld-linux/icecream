@@ -52,6 +52,7 @@ Pliki nagłówkowe dla icecream.
 rm -rf $RPM_BUILD_ROOT
 
 install -d $RPM_BUILD_ROOT/etc/{sysconfig,rc.d/init.d}
+install -d $RPM_BUILD_ROOT%{_libdir}/icecc/bin
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -59,10 +60,25 @@ install -d $RPM_BUILD_ROOT/etc/{sysconfig,rc.d/init.d}
 install suse/sysconfig.icecream $RPM_BUILD_ROOT/etc/sysconfig/icecream
 install suse/init.icecream $RPM_BUILD_ROOT/etc/rc.d/init.d/icecream
 
+for i in cc gcc c++ g++; do
+	ln -sf %{_bindir}/icecc $RPM_BUILD_ROOT%{_libdir}/icecc/bin/$i
+	rm -f $RPM_BUILD_ROOT%{_bindir}/$i
+done
+
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post   -p /sbin/ldconfig
+%post -p /sbin/ldconfig
+/sbin/chkconfig --add %{name}
+%service %{name} restart
+
+%preun
+if [ "$1" = "0" ]; then
+	%service %{name} stop
+	/sbin/chkconfig --del %{name}
+fi
+
 %postun -p /sbin/ldconfig
 
 %files
@@ -71,6 +87,11 @@ rm -rf $RPM_BUILD_ROOT
 %attr(754,root,root) /etc/rc.d/init.d/%{name}
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
+%{_libdir}/icecc/bin/cc
+%{_libdir}/icecc/bin/gcc
+%{_libdir}/icecc/bin/c++
+%{_libdir}/icecc/bin/g++
+%{_libdir}/icecc/icecc-create-env
 %attr(755,root,root) %{_sbindir}/*
 %attr(755,root,root) %{_libdir}/lib*.so.*.*
 %attr(755,root,root) %{_libdir}/libicecc.so.0
