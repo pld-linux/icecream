@@ -7,7 +7,8 @@ License:	GPL v2
 Group:		Development/Languages
 Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
 # Source0-md5:	d8f65259ef2f72d36c157b64a2ff11d5
-Source1:	%{name}-iceccd.init
+Source1:	%{name}.sysconfig
+Source2:	%{name}-iceccd.init
 URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -58,8 +59,8 @@ install -d $RPM_BUILD_ROOT%{_libdir}/icecc/bin
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-install suse/sysconfig.icecream $RPM_BUILD_ROOT/etc/sysconfig/icecream
-install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/iceccd
+install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/icecream
+install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/iceccd
 
 for i in cc gcc c++ g++; do
 	ln -sf %{_bindir}/icecc $RPM_BUILD_ROOT%{_libdir}/icecc/bin/$i
