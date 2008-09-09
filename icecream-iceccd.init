@@ -20,7 +20,7 @@
 
 # Source config
 if [ -f /etc/sysconfig/icecream ] ; then
-        . /etc/sysconfig/icecream
+	. /etc/sysconfig/icecream
 fi
 
 exec=/usr/sbin/iceccd
@@ -57,9 +57,9 @@ start() {
 	daemon $exec -d -u icecream $params
 	RETVAL=$?
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/iceccd
-        else
-                msg_already_running iceccd
-        fi
+	else
+		msg_already_running iceccd
+	fi
 
 	return $RETVAL
 }
@@ -75,38 +75,38 @@ stop() {
 }
 
 condrestart() {
-        if [ -f /var/lock/subsys/iceccd ]; then
-                stop
-                start
-        else
-                msg_not_running icecream
-                RETVAL=$1
-        fi
+	if [ -f /var/lock/subsys/iceccd ]; then
+		stop
+		start
+	else
+		msg_not_running icecream
+		RETVAL=$1
+	fi
 }
 
 RETVAL=0
 case "$1" in
   start)
-        start
-        ;;
+	start
+	;;
   stop)
-        stop
-        ;;
+	stop
+	;;
   restart)
-      	condrestart 
-        ;;
+	condrestart 
+	;;
   try-restart)
-        condrestart 0
-        ;;
+	condrestart 0
+	;;
   force-reload)
-        condrestart 7
-        ;;
+	condrestart 7
+	;;
   status)
-        status icecream
-        ;;
+	status icecream
+	;;
   *)
-        msg_usage "$0 {start|stop|restart|try-restart|force-reload|status}"
-        exit 3
+	msg_usage "$0 {start|stop|restart|try-restart|force-reload|status}"
+	exit 3
 esac
 
 exit $RETVAL
