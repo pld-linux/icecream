@@ -1,12 +1,12 @@
 Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
-Version:	0.7.14
-Release:	2
+Version:	0.9.1
+Release:	1
 License:	GPL v2
 Group:		Development/Languages
 Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
-# Source0-md5:	8d167d48bc7854b6277a105cafbf2b49
+# Source0-md5:	d8f65259ef2f72d36c157b64a2ff11d5
 URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -32,7 +32,7 @@ Header files for icecream.
 Pliki nagłówkowe dla icecream.
 
 %prep
-%setup -q -n icecream
+%setup -q -n icecc-%{version}
 
 %build
 %{__libtoolize}
@@ -62,10 +62,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc ChangeLog NEWS README TODO
+%doc COPYING NEWS README TODO
 %attr(755,root,root) %{_bindir}/icecc
 %attr(755,root,root) %{_sbindir}/*
 %attr(755,root,root) %{_libdir}/lib*.so.*.*
+%attr(755,root,root) %{_libdir}/libicecc.so.0
 %{_libdir}/icecc
 
 %files devel
