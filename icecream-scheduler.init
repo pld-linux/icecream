@@ -20,75 +20,75 @@
 
 # Source config
 if [ -f /etc/sysconfig/icecream ] ; then
-        . /etc/sysconfig/icecream
+	. /etc/sysconfig/icecream
 fi
 
 exec=/usr/sbin/scheduler
 
 start() {
-        [ -x $exec ] || exit 5
-        if [ ! -f /var/lock/subsys/icecc-scheduler ]; then
-	msg_starting icecc-scheduler
-	params=""
-	if [ -n "$ICECREAM_NETNAME" ] ; then
-		params="$params -n $ICECREAM_NETNAME"
+	[ -x $exec ] || exit 5
+	if [ ! -f /var/lock/subsys/icecc-scheduler ]; then
+		msg_starting icecc-scheduler
+		params=""
+		if [ -n "$ICECREAM_NETNAME" ] ; then
+			params="$params -n $ICECREAM_NETNAME"
+		fi
+		logfile=${ICECREAM_SCHEDULER_LOG_FILE:-/var/log/icecc-scheduler}
+		params="$params -l $logfile"
+		daemon --user icecream $exec -d $params
+		RETVAL=$?
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/icecc-scheduler
+	else
+		msg_already_running icecc-scheduler
 	fi
-	logfile=${ICECREAM_SCHEDULER_LOG_FILE:-/var/log/icecc-scheduler}
-	params="$params -l $logfile"
-	daemon --user icecream $exec -d $params
-	RETVAL=$?
-        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/icecc-scheduler
-        else
-                msg_already_running icecc-scheduler
-        fi
 
-        return $RETVAL
+	return $RETVAL
 }
 
 stop() {
-        if [ -f /var/lock/subsys/icecc-scheduler ]; then
-                msg_stopping icecc-scheduler
-                killproc icecc-scheduler
-                rm -f /var/lock/subsys/icecc-scheduler
-        else
-                msg_not_running icecc-scheduler
-        fi
+	if [ -f /var/lock/subsys/icecc-scheduler ]; then
+		msg_stopping icecc-scheduler
+		killproc icecc-scheduler
+		rm -f /var/lock/subsys/icecc-scheduler
+	else
+		msg_not_running icecc-scheduler
+	fi
 }
 
 condrestart() {
-        if [ -f /var/lock/subsys/icecc-scheduler ]; then
-                stop
-                start
-        else
-                msg_not_running icecc-scheduler
-                RETVAL=$1
-        fi
+	if [ -f /var/lock/subsys/icecc-scheduler ]; then
+		stop
+		start
+	else
+		msg_not_running icecc-scheduler
+		RETVAL=$1
+	fi
 }
 
 RETVAL=0
 case "$1" in
   start)
-        start
-        ;;
+	start
+	;;
   stop)
-        stop
-        ;;
+	stop
+	;;
   restart)
-        stop
-        start
-        ;;
+	stop
+	start
+	;;
   try-restart)
-        condrestart 0
-        ;;
+	condrestart 0
+	;;
   force-reload)
-        condrestart 7
-        ;;
+	condrestart 7
+	;;
   status)
-        status icecc-scheduler
-        ;;
+	status icecc-scheduler
+	;;
   *)
-        msg_usage "$0 {start|stop|restart|try-restart|force-reload|status}"
-        exit 3
+	msg_usage "$0 {start|stop|restart|try-restart|force-reload|status}"
+	exit 3
 esac
 
 exit $RETVAL
