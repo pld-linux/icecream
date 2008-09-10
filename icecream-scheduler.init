@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+# icecc-scheduler:   Distributed compiler scheduler
+#
+# chkconfig: - 98 02
+# description:  This is a daemon which schedules compilation jobs to \
+#		networked machines running iceccd.
+#
+
+### BEGIN INIT INFO
+# Provides: icecc-scheduler
+# Required-Start: $local_fs $remote_fs $network
+# Required-Stop: $local_fs $remote_fs $network
+# Short-Description: Start/stop Icecream scheduler
+# Description: Start / stop the scheduler for Icecream distributed compilers
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source config
+if [ -f /etc/sysconfig/icecream ] ; then
+        . /etc/sysconfig/icecream
+fi
+
+exec=/usr/sbin/scheduler
+
+start() {
+        [ -x $exec ] || exit 5
+        if [ ! -f /var/lock/subsys/icecc-scheduler ]; then
+	msg_starting icecc-scheduler
+	params=""
+	if [ -n "$ICECREAM_NETNAME" ] ; then
+		params="$params -n $ICECREAM_NETNAME"
+	fi
+	logfile=${ICECREAM_SCHEDULER_LOG_FILE:-/var/log/icecc-scheduler}
+	params="$params -l $logfile"
+	daemon --user icecream $exec -d $params
+	RETVAL=$?
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/icecc-scheduler
+        else
+                msg_already_running icecc-scheduler
+        fi
+
+        return $RETVAL
+}
+
+stop() {
+        if [ -f /var/lock/subsys/icecc-scheduler ]; then
+                msg_stopping icecc-scheduler
+                killproc icecc-scheduler
+                rm -f /var/lock/subsys/icecc-scheduler
+        else
+                msg_not_running icecc-scheduler
+        fi
+}
+
+condrestart() {
+        if [ -f /var/lock/subsys/icecc-scheduler ]; then
+                stop
+                start
+        else
+                msg_not_running icecc-scheduler
+                RETVAL=$1
+        fi
+}
+
+RETVAL=0
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart)
+        stop
+        start
+        ;;
+  try-restart)
+        condrestart 0
+        ;;
+  force-reload)
+        condrestart 7
+        ;;
+  status)
+        status icecc-scheduler
+        ;;
+  *)
+        msg_usage "$0 {start|stop|restart|try-restart|force-reload|status}"
+        exit 3
+esac
+
+exit $RETVAL
