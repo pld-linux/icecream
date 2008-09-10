@@ -13,16 +13,16 @@ Source3:	%{name}-scheduler.init
 URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake >= 1.6
-BuildRequires:	libtool
 BuildRequires:	librsync-devel
-Requires(pre):	/bin/id
-Requires(pre):	/usr/bin/getgid
-Requires(pre):	/usr/sbin/groupadd
-Requires(pre):	/usr/sbin/useradd
+BuildRequires:	libtool
 Requires(post,postun):	/sbin/ldconfig
 Requires(post,preun):	/sbin/chkconfig
 Requires(postun):	/usr/sbin/groupdel
 Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
 Requires:	rc-scripts
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -79,7 +79,7 @@ install -d $RPM_BUILD_ROOT%{_libdir}/icecc/bin
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/icecream
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/iceccd
-install %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/icecc-scheduler             
+install %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/icecc-scheduler
 
 for i in cc gcc c++ g++; do
 	ln -sf %{_bindir}/icecc $RPM_BUILD_ROOT%{_libdir}/icecc/bin/$i
@@ -93,7 +93,7 @@ rm -rf $RPM_BUILD_ROOT
 %groupadd -g 197 icecream
 %useradd -u 197 -s /bin/false -d /var/cache/icecream -c "Icecream User" -g icecream icecream
 
-%post 
+%post
 /sbin/ldconfig
 /sbin/chkconfig --add iceccd
 %service iceccd restart
@@ -115,7 +115,7 @@ fi
 %defattr(644,root,root,755)
 %doc NEWS README TODO
 %attr(754,root,root) /etc/rc.d/init.d/iceccd
-%attr(754,root,root) /etc/rc.d/init.d/icecc-scheduler                                       
+%attr(754,root,root) /etc/rc.d/init.d/icecc-scheduler
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
 %attr(755,root,root) %{_sbindir}/iceccd
