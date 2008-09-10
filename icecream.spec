@@ -9,6 +9,7 @@ Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
 # Source0-md5:	d8f65259ef2f72d36c157b64a2ff11d5
 Source1:	%{name}.sysconfig
 Source2:	%{name}-iceccd.init
+Source3:	%{name}-scheduler.init
 URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake >= 1.6
@@ -26,7 +27,14 @@ Requires:	rc-scripts
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-Icecream is the next generation distcc.
+Icecream is a distributed compile system. It allows parallel compiling
+by distributing the compile jobs to several nodes of a compile network
+running the icecc daemon. The icecc scheduler routes the jobs and
+provides status and statistics information to the icecc monitor. Each
+compile node can accept one or more compile jobs depending on the
+number of processors and the settings of the daemon. Link jobs and
+other jobs which cannot be distributed are executed locally on the
+node where the compilation is started.
 
 %description -l pl.UTF-8
 Icecream jest kompilatorem distcc nowej generacji.
@@ -71,6 +79,7 @@ install -d $RPM_BUILD_ROOT%{_libdir}/icecc/bin
 
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/icecream
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/iceccd
+install %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/icecc-scheduler             
 
 for i in cc gcc c++ g++; do
 	ln -sf %{_bindir}/icecc $RPM_BUILD_ROOT%{_libdir}/icecc/bin/$i
@@ -106,6 +115,7 @@ fi
 %defattr(644,root,root,755)
 %doc NEWS README TODO
 %attr(754,root,root) /etc/rc.d/init.d/iceccd
+%attr(754,root,root) /etc/rc.d/init.d/icecc-scheduler                                       
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
 %attr(755,root,root) %{_sbindir}/iceccd
