@@ -34,7 +34,8 @@ start() {
 			params="$params -n $ICECREAM_NETNAME"
 		fi
 		logfile=${ICECREAM_SCHEDULER_LOG_FILE:-/var/log/icecc-scheduler}
-		params="$params -l $logfile"
+		verbosity="$ICECREAM_VERBOSITY"
+		params="$params -l $logfile $verbosity"
 		daemon --user icecream $exec -d $params
 		RETVAL=$?
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/icecc-scheduler

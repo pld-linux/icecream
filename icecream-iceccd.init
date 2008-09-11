@@ -53,7 +53,8 @@ start() {
 			params="$params -m $ICECREAM_MAX_JOBS"
 		fi
 	fi
-	params="$params -b \"$ICECREAM_BASEDIR\""
+	verbosity="$ICECREAM_VERBOSITY"
+	params="$params -b \"$ICECREAM_BASEDIR\" $verbosity"
 	daemon $exec -d -u icecream $params
 	RETVAL=$?
 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/iceccd
