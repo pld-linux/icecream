@@ -1,12 +1,12 @@
 Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
-Version:	0.9.1
+Version:	1.1
 Release:	1
 License:	GPL v2
 Group:		Development/Languages
-Source0:	ftp://ftp.suse.com/pub/projects/icecream/icecc-%{version}.tar.bz2
-# Source0-md5:	d8f65259ef2f72d36c157b64a2ff11d5
+Source0:	https://github.com/icecc/icecream/archive/%{version}/%{name}-%{version}.tar.gz
+# Source0-md5:	bd33e21fa25ccedeb5c94be9c6f034e1
 Source1:	%{name}.sysconfig
 Source2:	%{name}-iceccd.init
 Source3:	%{name}-scheduler.init
@@ -52,7 +52,7 @@ Header files for icecream.
 Pliki nagłówkowe dla icecream.
 
 %prep
-%setup -q -n icecc-%{version}
+%setup -q
 
 %build
 %{__libtoolize}
@@ -61,6 +61,7 @@ Pliki nagłówkowe dla icecream.
 %{__autoheader}
 %{__automake}
 %configure \
+	ac_cv_path_DOCBOOK2X=docbook2X2man \
 	--enable-shared \
 	--disable-static
 
@@ -80,11 +81,6 @@ install -d $RPM_BUILD_ROOT%{_libdir}/icecc/bin
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/icecream
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/iceccd
 install %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/icecc-scheduler
-
-for i in cc gcc c++ g++; do
-	ln -sf %{_bindir}/icecc $RPM_BUILD_ROOT%{_libdir}/icecc/bin/$i
-	rm -f $RPM_BUILD_ROOT%{_bindir}/$i
-done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -118,17 +114,24 @@ fi
 %attr(754,root,root) /etc/rc.d/init.d/icecc-scheduler
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
+%attr(755,root,root) %{_bindir}/icecc-create-env
+%attr(755,root,root) %{_bindir}/icerun
 %attr(755,root,root) %{_sbindir}/iceccd
-%attr(755,root,root) %{_sbindir}/scheduler
+%attr(755,root,root) %{_sbindir}/icecc-scheduler
 %attr(755,root,root) %{_libdir}/libicecc.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libicecc.so.0
 %dir %{_libdir}/icecc
 %dir %{_libdir}/icecc/bin
-%attr(755,root,root) %{_libdir}/icecc/bin/cc
-%attr(755,root,root) %{_libdir}/icecc/bin/gcc
-%attr(755,root,root) %{_libdir}/icecc/bin/c++
-%attr(755,root,root) %{_libdir}/icecc/bin/g++
-%attr(755,root,root) %{_libdir}/icecc/icecc-create-env
+%attr(755,root,root) %{_libexecdir}/icecc/bin/c++
+%attr(755,root,root) %{_libexecdir}/icecc/bin/cc
+%attr(755,root,root) %{_libexecdir}/icecc/bin/clang
+%attr(755,root,root) %{_libexecdir}/icecc/bin/clang++
+%attr(755,root,root) %{_libexecdir}/icecc/bin/g++
+%attr(755,root,root) %{_libexecdir}/icecc/bin/gcc
+%attr(755,root,root) %{_libexecdir}/icecc/compilerwrapper
+%attr(755,root,root) %{_libexecdir}/icecc/icecc-create-env
+%{_mandir}/man1/icecc*.1*
+%{_mandir}/man7/icecream*.7*
 
 %files devel
 %defattr(644,root,root,755)
