@@ -2,7 +2,7 @@ Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
 Version:	1.1
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Development/Languages
 Source0:	https://github.com/icecc/icecream/archive/%{version}/%{name}-%{version}.tar.gz
@@ -71,9 +71,7 @@ Pliki nagłówkowe dla icecream.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
 install -d $RPM_BUILD_ROOT/etc/{sysconfig,rc.d/init.d}
-install -d $RPM_BUILD_ROOT%{_libdir}/icecc/bin
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -120,8 +118,8 @@ fi
 %attr(755,root,root) %{_sbindir}/icecc-scheduler
 %attr(755,root,root) %{_libdir}/libicecc.so.*.*.*
 %attr(755,root,root) %ghost %{_libdir}/libicecc.so.0
-%dir %{_libdir}/icecc
-%dir %{_libdir}/icecc/bin
+%dir %{_libexecdir}/icecc
+%dir %{_libexecdir}/icecc/bin
 %attr(755,root,root) %{_libexecdir}/icecc/bin/c++
 %attr(755,root,root) %{_libexecdir}/icecc/bin/cc
 %attr(755,root,root) %{_libexecdir}/icecc/bin/clang
