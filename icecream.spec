@@ -1,3 +1,7 @@
+#
+# Conditional build:
+%bcond_without	systemd		# without systemd units
+
 Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
@@ -11,6 +15,8 @@ Source1:	%{name}.sysconfig
 Source2:	%{name}-iceccd.init
 Source3:	%{name}-scheduler.init
 Source4:	%{name}.tmpfiles
+Source5:	iceccd.service
+Source6:	icecc-scheduler.service
 URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake >= 1:1.11
@@ -21,6 +27,7 @@ BuildRequires:	libcap-ng-devel
 BuildRequires:	librsync-devel
 BuildRequires:	libtool
 BuildRequires:	lzo-devel
+BuildRequires:	rpmbuild(macros) >= 1.644
 BuildRequires:	zstd-devel
 Requires(post,postun):	/sbin/ldconfig
 Requires(post,preun):	/sbin/chkconfig
@@ -31,6 +38,7 @@ Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
 Requires:	rc-scripts
+%{?with_systemd:Requires:	systemd-units >= 38}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -97,6 +105,11 @@ install %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/icecc-scheduler
 
 cp -p %{SOURCE4} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/%{name}.conf
 
+%if %{with systemd}
+install -d $RPM_BUILD_ROOT%{systemdunitdir}
+cp -p %{SOURCE5} %{SOURCE6} $RPM_BUILD_ROOT%{systemdunitdir}
+%endif
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -108,12 +121,14 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/ldconfig
 /sbin/chkconfig --add iceccd
 %service iceccd restart
+%{?with_systemd:%systemd_post iceccd.service icecc-scheduler.service}
 
 %preun
 if [ "$1" = "0" ]; then
 	%service iceccd stop
 	/sbin/chkconfig --del iceccd
 fi
+%{?with_systemd:%systemd_preun iceccd.service icecc-scheduler.service}
 
 %postun
 if [ "$1" = "0" ]; then
@@ -121,6 +136,7 @@ if [ "$1" = "0" ]; then
 	%groupremove icecream
 fi
 /sbin/ldconfig
+%{?with_systemd:%systemd_reload}
 
 %files
 %defattr(644,root,root,755)
@@ -149,6 +165,10 @@ fi
 %{_mandir}/man1/icecc*.1*
 %{_mandir}/man1/icerun.1*
 %{_mandir}/man7/icecream*.7*
+%if %{with systemd}
+%{systemdunitdir}/iceccd.service
+%{systemdunitdir}/icecc-scheduler.service
+%endif
 %{systemdtmpfilesdir}/%{name}.conf
 %dir %attr(770,icecream,icecream) %{_localstatedir}/run/icecc
 

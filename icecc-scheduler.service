@@ -1,0 +1,25 @@
+[Unit]
+Description=Icecream Distributed Compiler Scheduler
+After=network-online.target
+
+[Service]
+Type=simple
+User=icecream
+Group=icecream
+EnvironmentFile=-/etc/sysconfig/icecream
+ExecStart=/usr/sbin/icecc-scheduler $ICECREAM_SCHEDULER_OPTIONS
+CapabilityBoundingSet=
+NoNewPrivileges=true
+RestrictSUIDSGID=true
+SystemCallFilter=~@clock @debug @module @mount @raw-io @reboot @swap @privileged @resources
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectProc=invisible
+PrivateDevices=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

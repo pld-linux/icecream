@@ -1,0 +1,28 @@
+[Unit]
+Description=Icecream Distributed Compiler
+After=network-online.target
+
+[Service]
+Type=simple
+User=icecream
+Group=icecream
+EnvironmentFile=-/etc/sysconfig/icecream
+ExecStart=/usr/sbin/iceccd $ICECREAM_OPTIONS
+AmbientCapabilities=CAP_SYS_CHROOT
+CapabilityBoundingSet=CAP_SYS_CHROOT
+RestrictSUIDSGID=true
+SystemCallFilter=~@clock @debug @module @raw-io @reboot @swap
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectProc=invisible
+PrivateDevices=true
+PrivateTmp=yes
+CacheDirectory=icecream
+CacheDirectoryMode=0750
+ReadWritePaths=/var/run/icecc
+
+[Install]
+WantedBy=multi-user.target
