@@ -1,20 +1,26 @@
 Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
-Version:	1.1
-Release:	2
+Version:	1.3.1
+Release:	1
 License:	GPL v2
 Group:		Development/Languages
 Source0:	https://github.com/icecc/icecream/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	bd33e21fa25ccedeb5c94be9c6f034e1
+# Source0-md5:	dba44e4152ae6a8361d034a9c543485b
 Source1:	%{name}.sysconfig
 Source2:	%{name}-iceccd.init
 Source3:	%{name}-scheduler.init
 URL:		http://en.opensuse.org/Icecream
-BuildRequires:	autoconf >= 2.53
-BuildRequires:	automake >= 1.6
+BuildRequires:	autoconf >= 2.63
+BuildRequires:	automake >= 1:1.11
+BuildRequires:	docbook-dtd45-xml
+BuildRequires:	docbook2X
+BuildRequires:	libarchive-devel
+BuildRequires:	libcap-ng-devel
 BuildRequires:	librsync-devel
 BuildRequires:	libtool
+BuildRequires:	lzo-devel
+BuildRequires:	zstd-devel
 Requires(post,postun):	/sbin/ldconfig
 Requires(post,preun):	/sbin/chkconfig
 Requires(postun):	/usr/sbin/groupdel
@@ -54,6 +60,10 @@ Pliki nagłówkowe dla icecream.
 %prep
 %setup -q
 
+%{__sed} -E -i -e '1s,#!\s*/usr/bin/env\s+bash(\s|$),#!%{__bash}\1,' \
+	client/icecc-create-env.in
+
+
 %build
 %{__libtoolize}
 %{__aclocal}
@@ -62,7 +72,9 @@ Pliki nagłówkowe dla icecream.
 %{__automake}
 %configure \
 	ac_cv_path_DOCBOOK2X=docbook2X2man \
+	--enable-clang-wrappers \
 	--enable-shared \
+	--disable-silent-rules \
 	--disable-static
 
 %{__make} \
@@ -113,6 +125,7 @@ fi
 %config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
 %attr(755,root,root) %{_bindir}/icecc-create-env
+%attr(755,root,root) %{_bindir}/icecc-test-env
 %attr(755,root,root) %{_bindir}/icerun
 %attr(755,root,root) %{_sbindir}/iceccd
 %attr(755,root,root) %{_sbindir}/icecc-scheduler
@@ -129,6 +142,7 @@ fi
 %attr(755,root,root) %{_libexecdir}/icecc/compilerwrapper
 %attr(755,root,root) %{_libexecdir}/icecc/icecc-create-env
 %{_mandir}/man1/icecc*.1*
+%{_mandir}/man1/icerun.1*
 %{_mandir}/man7/icecream*.7*
 
 %files devel
