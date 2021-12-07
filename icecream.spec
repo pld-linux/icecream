@@ -10,6 +10,7 @@ Source0:	https://github.com/icecc/icecream/archive/%{version}/%{name}-%{version}
 Source1:	%{name}.sysconfig
 Source2:	%{name}-iceccd.init
 Source3:	%{name}-scheduler.init
+Source4:	%{name}.tmpfiles
 URL:		http://en.opensuse.org/Icecream
 BuildRequires:	autoconf >= 2.63
 BuildRequires:	automake >= 1:1.11
@@ -83,7 +84,9 @@ Pliki nagłówkowe dla icecream.
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT/etc/{sysconfig,rc.d/init.d}
+install -d $RPM_BUILD_ROOT/etc/{sysconfig,rc.d/init.d} \
+	$RPM_BUILD_ROOT%{_localstatedir}/run/icecc \
+	$RPM_BUILD_ROOT%{systemdtmpfilesdir}
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -91,6 +94,8 @@ install -d $RPM_BUILD_ROOT/etc/{sysconfig,rc.d/init.d}
 install %{SOURCE1} $RPM_BUILD_ROOT/etc/sysconfig/icecream
 install %{SOURCE2} $RPM_BUILD_ROOT/etc/rc.d/init.d/iceccd
 install %{SOURCE3} $RPM_BUILD_ROOT/etc/rc.d/init.d/icecc-scheduler
+
+cp -p %{SOURCE4} $RPM_BUILD_ROOT%{systemdtmpfilesdir}/%{name}.conf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -144,6 +149,8 @@ fi
 %{_mandir}/man1/icecc*.1*
 %{_mandir}/man1/icerun.1*
 %{_mandir}/man7/icecream*.7*
+%{systemdtmpfilesdir}/%{name}.conf
+%dir %attr(770,icecream,icecream) %{_localstatedir}/run/icecc
 
 %files devel
 %defattr(644,root,root,755)
