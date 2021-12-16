@@ -6,7 +6,7 @@ Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
 Version:	1.3.1
-Release:	1
+Release:	2
 License:	GPL v2
 Group:		Development/Languages
 Source0:	https://github.com/icecc/icecream/archive/%{version}/%{name}-%{version}.tar.gz
@@ -27,18 +27,9 @@ BuildRequires:	libcap-ng-devel
 BuildRequires:	librsync-devel
 BuildRequires:	libtool
 BuildRequires:	lzo-devel
-BuildRequires:	rpmbuild(macros) >= 1.644
+BuildRequires:	rpm-build >= 4.6
+BuildRequires:	rpmbuild(macros) >= 1.671
 BuildRequires:	zstd-devel
-Requires(post,postun):	/sbin/ldconfig
-Requires(post,preun):	/sbin/chkconfig
-Requires(postun):	/usr/sbin/groupdel
-Requires(postun):	/usr/sbin/userdel
-Requires(pre):	/bin/id
-Requires(pre):	/usr/bin/getgid
-Requires(pre):	/usr/sbin/groupadd
-Requires(pre):	/usr/sbin/useradd
-Requires:	rc-scripts
-%{?with_systemd:Requires:	systemd-units >= 38}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -51,14 +42,74 @@ number of processors and the settings of the daemon. Link jobs and
 other jobs which cannot be distributed are executed locally on the
 node where the compilation is started.
 
-%description -l pl.UTF-8
-Icecream jest kompilatorem distcc nowej generacji.
+%package daemon
+Summary:	Program to distribute compilation of C or C++ (daemon)
+Requires(post,preun):	/sbin/chkconfig
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
+Requires:	rc-scripts
+%{?with_systemd:Requires:	systemd-units >= 38}
+Obsoletes:	icecream < 1.3.1-2
+
+%description daemon
+Icecream is a distributed compile system. It allows parallel compiling
+by distributing the compile jobs to several nodes of a compile network
+running the icecc daemon. The icecc scheduler routes the jobs and
+provides status and statistics information to the icecc monitor. Each
+compile node can accept one or more compile jobs depending on the
+number of processors and the settings of the daemon. Link jobs and
+other jobs which cannot be distributed are executed locally on the
+node where the compilation is started.
+
+This package contains icecream daemon.
+
+%package scheduler
+Summary:	Program to distribute compilation of C or C++ (scheduler)
+Requires:	%{name}-common = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
+Requires:	rc-scripts
+%{?with_systemd:Requires:	systemd-units >= 38}
+Conflicts:	icecream < 1.3.1-2
+
+%description scheduler
+Icecream is a distributed compile system. It allows parallel compiling
+by distributing the compile jobs to several nodes of a compile network
+running the icecc daemon. The icecc scheduler routes the jobs and
+provides status and statistics information to the icecc monitor. Each
+compile node can accept one or more compile jobs depending on the
+number of processors and the settings of the daemon. Link jobs and
+other jobs which cannot be distributed are executed locally on the
+node where the compilation is started.
+
+This package contains icecream scheduler.
+
+%package common
+Summary:	Common files for Icecream daemon and scheduler
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
+Conflicts:	icecream < 1.3.1-2
+BuildArch:	noarch
+
+%description common
+Common files for Icecream daemon and scheduler.
+
+%package libs
+Summary:	Icecream shared library
+Group:		Libraries
+Conflicts:	icecream < 1.3.1-2
+
+%description libs
+Icecream shared library.
 
 %package devel
 Summary:	Header files for icecream
 Summary(pl.UTF-8):	Pliki nagłówkowe icecream
 Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description devel
 Header files for icecream.
@@ -113,45 +164,56 @@ cp -p %{SOURCE5} %{SOURCE6} $RPM_BUILD_ROOT%{systemdunitdir}
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%pre
-%groupadd -g 197 icecream
-%useradd -u 197 -s /bin/false -d /var/cache/icecream -c "Icecream User" -g icecream icecream
-
-%post
-/sbin/ldconfig
+%post	daemon
 /sbin/chkconfig --add iceccd
 %service iceccd restart
-%{?with_systemd:%systemd_post iceccd.service icecc-scheduler.service}
+%{?with_systemd:%systemd_post iceccd.service}
 
-%preun
+%preun	daemon
 if [ "$1" = "0" ]; then
 	%service iceccd stop
 	/sbin/chkconfig --del iceccd
 fi
-%{?with_systemd:%systemd_preun iceccd.service icecc-scheduler.service}
+%{?with_systemd:%systemd_preun iceccd.service}
 
-%postun
+%postun	daemon
+%{?with_systemd:%systemd_reload}
+
+%post	scheduler
+%{?with_systemd:%systemd_post icecc-scheduler.service}
+
+%preun	scheduler
+%{?with_systemd:%systemd_preun icecc-scheduler.service}
+
+%postun	scheduler
+%{?with_systemd:%systemd_reload}
+
+%pre	common
+%groupadd -g 197 icecream
+%useradd -u 197 -s /bin/false -d /var/cache/icecream -c "Icecream User" -g icecream icecream
+
+%postun	common
 if [ "$1" = "0" ]; then
 	%userremove icecream
 	%groupremove icecream
 fi
-/sbin/ldconfig
-%{?with_systemd:%systemd_reload}
 
-%files
+%triggerpostun common -- icecream < 1.3.1-2
+%groupadd -g 197 icecream
+%useradd -u 197 -s /bin/false -d /var/cache/icecream -c "Icecream User" -g icecream icecream
+
+%post	libs -p /sbin/ldconfig
+
+%postun	libs -p /sbin/ldconfig
+
+%files daemon
 %defattr(644,root,root,755)
-%doc NEWS README TODO
 %attr(754,root,root) /etc/rc.d/init.d/iceccd
-%attr(754,root,root) /etc/rc.d/init.d/icecc-scheduler
-%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
 %attr(755,root,root) %{_bindir}/icecc
 %attr(755,root,root) %{_bindir}/icecc-create-env
 %attr(755,root,root) %{_bindir}/icecc-test-env
 %attr(755,root,root) %{_bindir}/icerun
 %attr(755,root,root) %{_sbindir}/iceccd
-%attr(755,root,root) %{_sbindir}/icecc-scheduler
-%attr(755,root,root) %{_libdir}/libicecc.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libicecc.so.0
 %dir %{_libexecdir}/icecc
 %dir %{_libexecdir}/icecc/bin
 %attr(755,root,root) %{_libexecdir}/icecc/bin/c++
@@ -162,15 +224,35 @@ fi
 %attr(755,root,root) %{_libexecdir}/icecc/bin/gcc
 %attr(755,root,root) %{_libexecdir}/icecc/compilerwrapper
 %attr(755,root,root) %{_libexecdir}/icecc/icecc-create-env
-%{_mandir}/man1/icecc*.1*
+%{_mandir}/man1/icecc-create-env.1*
+%{_mandir}/man1/icecc.1*
+%{_mandir}/man1/iceccd.1*
 %{_mandir}/man1/icerun.1*
-%{_mandir}/man7/icecream*.7*
 %if %{with systemd}
 %{systemdunitdir}/iceccd.service
-%{systemdunitdir}/icecc-scheduler.service
 %endif
 %{systemdtmpfilesdir}/%{name}.conf
 %dir %attr(770,icecream,icecream) %{_localstatedir}/run/icecc
+
+%files scheduler
+%defattr(644,root,root,755)
+%attr(754,root,root) /etc/rc.d/init.d/icecc-scheduler
+%attr(755,root,root) %{_sbindir}/icecc-scheduler
+%{_mandir}/man1/icecc-scheduler.1*
+%if %{with systemd}
+%{systemdunitdir}/icecc-scheduler.service
+%endif
+
+%files common
+%defattr(644,root,root,755)
+%doc NEWS README TODO
+%config(noreplace) %verify(not md5 mtime size) /etc/sysconfig/icecream
+%{_mandir}/man7/icecream*.7*
+
+%files libs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_libdir}/libicecc.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libicecc.so.0
 
 %files devel
 %defattr(644,root,root,755)
