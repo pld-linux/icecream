@@ -6,7 +6,7 @@ Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
 Version:	1.3.1
-Release:	2
+Release:	3
 License:	GPL v2
 Group:		Development/Languages
 Source0:	https://github.com/icecc/icecream/archive/%{version}/%{name}-%{version}.tar.gz
@@ -47,8 +47,21 @@ Summary:	Program to distribute compilation of C or C++ (daemon)
 Requires(post,preun):	/sbin/chkconfig
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-libs = %{version}-%{release}
+Requires:	bash
+Requires:	binutils
+Requires:	coreutils
+Requires:	file
+Requires:	glibc-misc
+Requires:	grep
+Requires:	ldconfig
 Requires:	rc-scripts
+Requires:	sed
 %{?with_systemd:Requires:	systemd-units >= 38}
+Requires:	tar
+Suggests:	bzip2
+Suggests:	gzip
+Suggests:	xz
+Suggests:	zstd
 Obsoletes:	icecream < 1.3.1-2
 
 %description daemon
