@@ -5,12 +5,12 @@
 Summary:	Program to distribute compilation of C or C++
 Summary(pl.UTF-8):	Program do rozdzielania kompilacji programów w C lub C++
 Name:		icecream
-Version:	1.3.1
-Release:	3
+Version:	1.4
+Release:	1
 License:	GPL v2
 Group:		Development/Languages
 Source0:	https://github.com/icecc/icecream/archive/%{version}/%{name}-%{version}.tar.gz
-# Source0-md5:	dba44e4152ae6a8361d034a9c543485b
+# Source0-md5:	3aaecba85978a61cae2739a48ca05ca3
 Source1:	%{name}.sysconfig
 Source2:	%{name}-iceccd.init
 Source3:	%{name}-scheduler.init
@@ -25,8 +25,10 @@ BuildRequires:	docbook2X
 BuildRequires:	libarchive-devel
 BuildRequires:	libcap-ng-devel
 BuildRequires:	librsync-devel
+BuildRequires:	libstdc++-devel >= 6:4.8.1
 BuildRequires:	libtool
 BuildRequires:	lzo-devel
+BuildRequires:	pkgconfig
 BuildRequires:	rpm-build >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.671
 BuildRequires:	zstd-devel
